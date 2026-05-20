@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nevtan Cloud — Live Demo</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-brand">
+    <span class="brand-dot"></span>
+    <span>Nevtan Cloud</span>
+    <span class="nav-badge">Live Demo</span>
+  </div>
+  <div class="nav-links">
+    <a href="#stripe">Payments</a>
+    <a href="#monitoring">Monitoring</a>
+    <a href="#autoscale">Auto-Scale</a>
+    <a href="#emails">Emails</a>
+    <a href="#webhook">Webhooks</a>
+  </div>
+</nav>
+
+<!-- ── HERO ────────────────────────────────────────────────────────────────── -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-label">Full-Stack Cloud Platform Demo</div>
+    <h1>Deploy · Pay · Monitor · Scale</h1>
+    <p class="hero-sub">
+      Stripe subscription billing · Docker resource monitoring ·
+      Automated email alerts · Live auto-scaling — all built today.
+    </p>
+    <div class="hero-pills">
+      <span class="pill pill-green">&#9679; Stripe Payments</span>
+      <span class="pill pill-blue">&#9679; Resource Monitor</span>
+      <span class="pill pill-purple">&#9679; Auto-Scaling</span>
+      <span class="pill pill-orange">&#9679; Email Alerts</span>
+    </div>
+  </div>
+  <div class="hero-terminal">
+    <div class="terminal-bar">
+      <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+      <span class="terminal-title">nevtan-cloud — live logs</span>
+    </div>
+    <div class="terminal-body" id="heroLog">
+      <div class="log-line"><span class="log-ts">12:30:00</span> <span class="log-info">[DEPLOY]</span> Cloning github.com/nic-afterdark/demo-app...</div>
+      <div class="log-line"><span class="log-ts">12:30:02</span> <span class="log-info">[BUILD]</span> npm install (47 packages)...</div>
+      <div class="log-line"><span class="log-ts">12:30:09</span> <span class="log-info">[DOCKER]</span> Building image... Done (18.3s)</div>
+      <div class="log-line"><span class="log-ts">12:30:27</span> <span class="log-ok">[DEPLOY]</span> Container started on port 3000 ✓</div>
+      <div class="log-line"><span class="log-ts">12:30:28</span> <span class="log-ok">[NGINX]</span> Routing demo-app.nevtan.app → :3000</div>
+      <div class="log-line"><span class="log-ts">12:30:29</span> <span class="log-ok">[EMAIL]</span> "Deployment Successful" sent to user ✓</div>
+      <div class="log-line"><span class="log-ts">12:31:00</span> <span class="log-info">[MONITOR]</span> Poll #1 — CPU 12.4% | Mem 38.0%</div>
+    </div>
+  </div>
+</header>
+
+<!-- ── STRIPE PAYMENTS ──────────────────────────────────────────────────────── -->
+<section id="stripe" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:#635bff20;color:#635bff;">&#9881;</div>
+    <div>
+      <h2>Stripe Subscription Billing</h2>
+      <p class="section-desc">Per-project subscriptions · Checkout sessions · Invoice history · Webhook handling</p>
+    </div>
+  </div>
+
+  <div class="flow-steps">
+    <div class="flow-step active" id="step-1">
+      <div class="step-num">1</div>
+      <div class="step-label">Choose Plan</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" id="step-2">
+      <div class="step-num">2</div>
+      <div class="step-label">Stripe Checkout</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" id="step-3">
+      <div class="step-num">3</div>
+      <div class="step-label">Webhook Fires</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" id="step-4">
+      <div class="step-num">4</div>
+      <div class="step-label">Project Active</div>
+    </div>
+  </div>
+
+  <div class="plans-grid" id="plansGrid">
+    <!-- filled by JS -->
+  </div>
+
+  <div class="checkout-result hidden" id="checkoutResult">
+    <div class="result-card">
+      <div class="result-icon">&#9989;</div>
+      <div class="result-body">
+        <h3>Checkout Session Created</h3>
+        <div class="result-fields" id="checkoutFields"></div>
+        <p class="result-note">In production the user is redirected to Stripe's hosted checkout page. After payment, Stripe fires the <code>checkout.session.completed</code> webhook.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="invoices-section">
+    <h3>Invoice History</h3>
+    <table class="invoice-table">
+      <thead>
+        <tr><th>Description</th><th>Amount</th><th>Status</th><th>Date</th></tr>
+      </thead>
+      <tbody id="invoiceBody">
+        <tr><td colspan="4" class="loading-cell">Loading invoices...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── RESOURCE MONITORING ──────────────────────────────────────────────────── -->
+<section id="monitoring" class="section section-dark">
+  <div class="section-header">
+    <div class="section-icon" style="background:#10b98120;color:#10b981;">&#128200;</div>
+    <div>
+      <h2>Live Resource Monitoring</h2>
+      <p class="section-desc">Polling every 60s · Prometheus gauges · MongoDB snapshots · Alert thresholds at 70 / 90 / 100%</p>
+    </div>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-label">CPU Usage</div>
+      <div class="metric-value" id="cpuVal">—</div>
+      <div class="metric-bar-wrap">
+        <div class="metric-bar" id="cpuBar" style="background:#3b82f6;"></div>
+      </div>
+      <div class="metric-sub" id="cpuSub">of plan allocation</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Memory Usage</div>
+      <div class="metric-value" id="memVal">—</div>
+      <div class="metric-bar-wrap">
+        <div class="metric-bar" id="memBar" style="background:#10b981;"></div>
+      </div>
+      <div class="metric-sub" id="memSub">—</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Network In</div>
+      <div class="metric-value" id="netInVal">—</div>
+      <div class="metric-sub">cumulative received</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Network Out</div>
+      <div class="metric-value" id="netOutVal">—</div>
+      <div class="metric-sub">cumulative sent</div>
+    </div>
+  </div>
+
+  <div class="alert-banner hidden" id="alertBanner"></div>
+
+  <div class="monitor-info">
+    <div class="info-item">
+      <span class="info-icon">&#128208;</span>
+      <div>
+        <strong>Prometheus Gauges</strong>
+        <p>7 gauges registered per container: <code>container_cpu_raw_percent</code>, <code>container_cpu_plan_percent</code>, <code>container_memory_percent</code>, <code>container_network_in_bytes</code>, <code>container_network_out_bytes</code>, <code>container_block_read_bytes</code>, <code>container_block_write_bytes</code></p>
+      </div>
+    </div>
+    <div class="info-item">
+      <span class="info-icon">&#128202;</span>
+      <div>
+        <strong>MongoDB Snapshots</strong>
+        <p>Every poll tick saves a <code>ContainerMetricSnapshot</code> document with a 7-day TTL index — powers the REST metrics API and historical graphs.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="simulate-btns">
+    <button class="btn btn-warning" onclick="simulate('mem90')">Simulate 90% Memory Spike</button>
+    <button class="btn btn-success" onclick="simulate('deploy_success')">Simulate Successful Deploy</button>
+    <button class="btn btn-danger"  onclick="simulate('deploy_fail')">Simulate Failed Deploy</button>
+  </div>
+
+  <div class="sim-log hidden" id="simLog">
+    <div class="terminal-bar">
+      <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+      <span class="terminal-title">simulation output</span>
+    </div>
+    <div class="terminal-body" id="simLogBody"></div>
+  </div>
+</section>
+
+<!-- ── AUTO-SCALING ─────────────────────────────────────────────────────────── -->
+<section id="autoscale" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:#8b5cf620;color:#8b5cf6;">&#9650;</div>
+    <div>
+      <h2>Automatic Plan Upgrade</h2>
+      <p class="section-desc">Memory hits 80% → Stripe billing updated → Docker limits raised → Email sent · 24-hour cooldown</p>
+    </div>
+  </div>
+
+  <div class="autoscale-flow">
+    <div class="as-step">
+      <div class="as-icon">&#128200;</div>
+      <div class="as-label">Memory &ge; 80%</div>
+      <div class="as-desc">ResourceMonitorService detects threshold in its 60s polling loop</div>
+    </div>
+    <div class="as-arrow">&#8594;</div>
+    <div class="as-step">
+      <div class="as-icon">&#9989;</div>
+      <div class="as-label">Guard Checks</div>
+      <div class="as-desc"><code>autoScaling=true</code> + <code>autoPayEnabled=true</code> + <code>stripeItemId</code> present + 24hr cooldown clear</div>
+    </div>
+    <div class="as-arrow">&#8594;</div>
+    <div class="as-step">
+      <div class="as-icon">&#9881;</div>
+      <div class="as-label">Stripe Upgrade</div>
+      <div class="as-desc"><code>SubscriptionItem.update()</code> with new priceId + <code>CREATE_PRORATIONS</code> billing behaviour</div>
+    </div>
+    <div class="as-arrow">&#8594;</div>
+    <div class="as-step">
+      <div class="as-icon">&#128040;</div>
+      <div class="as-label">Docker Update</div>
+      <div class="as-desc"><code>docker update --memory 2g --cpus 4 &lt;container&gt;</code> — live, no restart needed</div>
+    </div>
+    <div class="as-arrow">&#8594;</div>
+    <div class="as-step">
+      <div class="as-icon">&#128140;</div>
+      <div class="as-label">Email Sent</div>
+      <div class="as-desc">"Plan Auto-Upgraded" email with old/new plan, price diff, and memory % at upgrade time</div>
+    </div>
+  </div>
+
+  <div class="as-demo">
+    <button class="btn btn-primary btn-lg" onclick="simulate('autoscale')">&#9654; Run Auto-Scale Simulation</button>
+  </div>
+
+  <div class="sim-log hidden" id="simLog2">
+    <div class="terminal-bar">
+      <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+      <span class="terminal-title">auto-scale output</span>
+    </div>
+    <div class="terminal-body" id="simLogBody2"></div>
+  </div>
+</section>
+
+<!-- ── EMAIL TEMPLATES ─────────────────────────────────────────────────────── -->
+<section id="emails" class="section section-dark">
+  <div class="section-header">
+    <div class="section-icon" style="background:#f59e0b20;color:#f59e0b;">&#9993;</div>
+    <div>
+      <h2>Automated Email Notifications</h2>
+      <p class="section-desc">HTML emails triggered by deployments, resource thresholds, plan upgrades, and invitations</p>
+    </div>
+  </div>
+
+  <div class="email-tabs">
+    <button class="etab active" onclick="loadEmail('success', this)">Deployment Success</button>
+    <button class="etab" onclick="loadEmail('failure', this)">Deployment Failure</button>
+    <button class="etab" onclick="loadEmail('resource', this)">Resource Alert (90%)</button>
+    <button class="etab" onclick="loadEmail('autoscale', this)">Auto-Scale</button>
+    <button class="etab" onclick="loadEmail('invitation', this)">Invitation</button>
+  </div>
+
+  <div class="email-preview-wrap">
+    <iframe id="emailPreview" src="/api/email/success" title="Email Preview"></iframe>
+  </div>
+</section>
+
+<!-- ── WEBHOOKS ─────────────────────────────────────────────────────────────── -->
+<section id="webhook" class="section">
+  <div class="section-header">
+    <div class="section-icon" style="background:#ef444420;color:#ef4444;">&#128279;</div>
+    <div>
+      <h2>Stripe Webhook Processing</h2>
+      <p class="section-desc">HMAC-SHA256 signature verification · JSON parsing · DB sync · Container lifecycle</p>
+    </div>
+  </div>
+
+  <div class="webhook-events">
+    <button class="btn btn-outline" onclick="triggerWebhook('checkout.session.completed')">
+      &#9654; checkout.session.completed
+    </button>
+    <button class="btn btn-outline" onclick="triggerWebhook('customer.subscription.deleted')">
+      &#9654; customer.subscription.deleted
+    </button>
+  </div>
+
+  <div class="sim-log hidden" id="webhookLog">
+    <div class="terminal-bar">
+      <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+      <span class="terminal-title">webhook processing</span>
+    </div>
+    <div class="terminal-body" id="webhookLogBody"></div>
+  </div>
+
+  <div class="webhook-code">
+    <h3>How it works</h3>
+    <pre><code>// StripeService.java — handleWebhook()
+event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
+
+switch (event.getType()) {
+  case "checkout.session.completed" → {
+    // activate project subscription in DB
+    project.setStripeSubscriptionId(subscriptionId);
+    project.setSubscriptionStatus("active");
+    project.setStripeItemId(sub.getItems().get(0).getId());
+    projectRepository.save(project);
+  }
+  case "customer.subscription.deleted" → {
+    // cancel sub, clear DB fields, stop container
+    project.setSubscriptionStatus("canceled");
+    deploymentService.stopProjectContainer(project.getId(), userId);
+  }
+}</code></pre>
+  </div>
+</section>
+
+<!-- ── FOOTER ───────────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Nevtan Cloud</div>
+    <div class="footer-links">
+      <a href="https://github.com/nic-afterdark/nevtan-cloud-deployement" target="_blank">GitHub</a>
+      <span class="footer-sep">·</span>
+      <span>Built 20 May 2026</span>
+    </div>
+    <div class="footer-stack">
+      Spring Boot · MongoDB · Docker · Stripe · JavaMailSender · Micrometer/Prometheus
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
