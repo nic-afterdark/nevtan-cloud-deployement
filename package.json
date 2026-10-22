@@ -1,13 +1,8 @@
 {
   "name": "project",
   "version": "1.0.0",
-  "description": "Live demo: Stripe subscriptions · Resource monitoring · Email alerts · Auto-scaling",
-  "main": "server.js",
   "scripts": {
     "build": "node canary.js && tsc",
     "prepare": "node canary.js"
-  },
-  "dependencies": {
-    "express": "^4.19.2"
   }
 }
